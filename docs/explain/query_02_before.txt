@@ -1,0 +1,18 @@
+QUERY:
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT * FROM payledger.fraud_alerts
+WHERE status IN ('open', 'investigating')
+ORDER BY severity DESC;
+
+WITHOUT INDEX (Sequential Table Scan):
+--------------------------------------------------------------------------------------------------------------------------------------------
+Sort  (cost=142.50..144.10 rows=640 width=118) (actual time=4.821..4.882 rows=620 loops=1)
+  Sort Key: severity DESC
+  Sort Method: quicksort  Memory: 95kB
+  Buffers: shared hit=42 read=56
+  ->  Seq Scan on fraud_alerts  (cost=0.00..112.50 rows=640 width=118) (actual time=0.025..3.910 rows=620 loops=1)
+        Filter: (status = ANY ('{open,investigating}'::alert_status[]))
+        Rows Removed by Filter: 4880
+        Buffers: shared hit=42 read=56
+Planning Time: 0.245 ms
+Execution Time: 4.960 ms

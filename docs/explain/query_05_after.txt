@@ -1,0 +1,21 @@
+QUERY:
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT * FROM payledger.audit_log
+WHERE entity = 'loans'
+ORDER BY at DESC
+LIMIT 30;
+
+WITH COMPOSITE INDEX: idx_audit_entity ON audit_log (entity, at DESC)
+--------------------------------------------------------------------------------------------------------------------------------------------
+Limit  (cost=0.42..32.14 rows=30 width=180) (actual time=0.038..0.082 rows=30 loops=1)
+  Buffers: shared hit=6 read=0
+  ->  Index Scan using idx_audit_entity on audit_log  (cost=0.42..402.10 rows=380 width=180) (actual time=0.036..0.078 rows=30 loops=1)
+        Index Cond: ((entity)::text = 'loans'::text)
+        Buffers: shared hit=6 read=0
+Planning Time: 0.150 ms
+Execution Time: 0.105 ms
+
+IMPROVEMENT SUMMARY:
+  Execution Time: 12.510 ms -> 0.105 ms (119x speedup)
+  Buffer Reads: 365 blocks -> 6 blocks (98.4% I/O reduction)
+  Sort completely avoided; results served in index order.

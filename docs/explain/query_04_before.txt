@@ -1,0 +1,14 @@
+QUERY:
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT * FROM payledger.loans
+WHERE user_id = 'b2222222-2222-2222-2222-222222222222'
+  AND status = 'active';
+
+WITHOUT INDEX (Sequential Table Scan):
+--------------------------------------------------------------------------------------------------------------------------------------------
+Seq Scan on loans  (cost=0.00..85.50 rows=2 width=92) (actual time=0.035..2.120 rows=2 loops=1)
+  Filter: ((status = 'active'::loan_status) AND (user_id = 'b2222222-2222-2222-2222-222222222222'::uuid))
+  Rows Removed by Filter: 3450
+  Buffers: shared hit=28 read=42
+Planning Time: 0.198 ms
+Execution Time: 2.155 ms

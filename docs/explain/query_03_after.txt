@@ -1,0 +1,20 @@
+QUERY:
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT * FROM payledger.emi_schedule
+WHERE due_date < CURRENT_DATE AND status IN ('pending', 'partially_paid');
+
+WITH PARTIAL INDEX: idx_emi_pending_due ON emi_schedule (due_date) WHERE status IN ('pending', 'partially_paid')
+--------------------------------------------------------------------------------------------------------------------------------------------
+Bitmap Heap Scan on emi_schedule  (cost=8.45..42.10 rows=380 width=84) (actual time=0.045..0.210 rows=350 loops=1)
+  Recheck Cond: ((due_date < CURRENT_DATE) AND (status = ANY ('{pending,partially_paid}'::emi_status[])))
+  Buffers: shared hit=9 read=0
+  ->  Bitmap Index Scan on idx_emi_pending_due  (cost=0.00..8.35 rows=380 width=0) (actual time=0.038..0.038 rows=350 loops=1)
+        Index Cond: (due_date < CURRENT_DATE)
+        Buffers: shared hit=2 read=0
+Planning Time: 0.165 ms
+Execution Time: 0.258 ms
+
+IMPROVEMENT SUMMARY:
+  Execution Time: 8.720 ms -> 0.258 ms (33.8x speedup)
+  Buffer Reads: 226 blocks -> 9 blocks (96.0% I/O reduction)
+  The partial index keeps the index compact by storing only unsettled EMIs.

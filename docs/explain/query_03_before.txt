@@ -1,0 +1,13 @@
+QUERY:
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT * FROM payledger.emi_schedule
+WHERE due_date < CURRENT_DATE AND status IN ('pending', 'partially_paid');
+
+WITHOUT INDEX (Sequential Table Scan):
+--------------------------------------------------------------------------------------------------------------------------------------------
+Seq Scan on emi_schedule  (cost=0.00..328.00 rows=380 width=84) (actual time=0.042..8.640 rows=350 loops=1)
+  Filter: ((due_date < CURRENT_DATE) AND (status = ANY ('{pending,partially_paid}'::emi_status[])))
+  Rows Removed by Filter: 12450
+  Buffers: shared hit=84 read=142
+Planning Time: 0.312 ms
+Execution Time: 8.720 ms

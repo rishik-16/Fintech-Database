@@ -1,0 +1,21 @@
+QUERY:
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT * FROM payledger.audit_log
+WHERE entity = 'loans'
+ORDER BY at DESC
+LIMIT 30;
+
+WITHOUT INDEX (Sequential Table Scan + Top-N Heapsort):
+--------------------------------------------------------------------------------------------------------------------------------------------
+Limit  (cost=425.20..425.28 rows=30 width=180) (actual time=12.450..12.455 rows=30 loops=1)
+  Buffers: shared hit=120 read=245
+  ->  Sort  (cost=425.20..426.15 rows=380 width=180) (actual time=12.448..12.452 rows=30 loops=1)
+        Sort Key: at DESC
+        Sort Method: top-N heapsort  Memory: 38kB
+        Buffers: shared hit=120 read=245
+        ->  Seq Scan on audit_log  (cost=0.00..408.00 rows=380 width=180) (actual time=0.054..11.230 rows=380 loops=1)
+              Filter: ((entity)::text = 'loans'::text)
+              Rows Removed by Filter: 15200
+              Buffers: shared hit=120 read=245
+Planning Time: 0.280 ms
+Execution Time: 12.510 ms
